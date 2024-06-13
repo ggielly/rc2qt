@@ -18,7 +18,7 @@ This is an alpha version and my first Rust program.
 
 1. Clone the repository:
     ```sh
-    git clone <repository-url>
+    git clone https://github.com/ggielly/rc2qt.git
     cd rc2qt
     ```
 
@@ -34,7 +34,7 @@ This is an alpha version and my first Rust program.
 
 ## Licence 
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the GNU GPL v3 License. See the LICENSE file for details.
 
 
 ## Explanation

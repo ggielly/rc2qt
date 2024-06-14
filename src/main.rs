@@ -1,3 +1,6 @@
+extern crate env_logger;
+extern crate log;
+
 mod generator;
 mod parser;
 mod resource;

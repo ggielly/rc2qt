@@ -2,6 +2,7 @@ use regex::Regex;
 use std::io::{self, BufRead};
 use std::path::Path;
 use crate::resource::*;
+use log::{info, warn, error}; // Import logging macros
 
 pub fn parse_rc_file(file_path: &str) -> (
     RcBitmapList, RcIconList, RcStringTableList, RcToolbarList, RcAcceleratorTableList, RcMenuList, RcDialogExList
@@ -21,10 +22,76 @@ pub fn parse_rc_file(file_path: &str) -> (
             // Example for bitmaps:
             let bitmap_re = Regex::new(r#"(\w+)\s+BITMAP\s+"(.+)""#).unwrap();
             if let Some(caps) = bitmap_re.captures(line) {
+                let id = caps[1].to_string();
+                let file = caps[2].to_string();
+
+                // Logging information
+                info!("Parsing bitmap: ID = {}, File = {}", id, file);
+
+                // Basic validation: check if file path ends with ".bmp"
+                if !file.ends_with(".bmp") {
+                    warn!("Bitmap file '{}' does not have a .bmp extension", file);
+                }
+
+                // Optional: Normalize file paths, e.g., replace backslashes with forward slashes
+                let normalized_file = file.replace("\\", "/");
+
+                // Extract additional attributes
+                let mut width: Option<u32> = None;
+                let mut height: Option<u32> = None;
+                let mut color_depth: Option<u32> = None;
+                let mut compression: Option<String> = None;
+                let mut palette: Option<String> = None;
+                let mut dpi: Option<u32> = None;
+                let mut color_mode: Option<String> = None;
+                let mut compression_level: Option<u32> = None;
+                let mut author: Option<String> = None;
+
+                // Look ahead for additional attributes
+                while let Some(Ok(attr_line)) = lines.next() {
+                    let attr_line = attr_line.trim();
+                    if attr_line.starts_with("END") {
+                        break;
+                    }
+
+                    if let Some(caps) = Regex::new(r#"WIDTH\s+(\d+)"#).unwrap().captures(attr_line) {
+                        width = Some(caps[1].parse().unwrap());
+                    } else if let Some(caps) = Regex::new(r#"HEIGHT\s+(\d+)"#).unwrap().captures(attr_line) {
+                        height = Some(caps[1].parse().unwrap());
+                    } else if let Some(caps) = Regex::new(r#"COLOR_DEPTH\s+(\d+)"#).unwrap().captures(attr_line) {
+                        color_depth = Some(caps[1].parse().unwrap());
+                    } else if let Some(caps) = Regex::new(r#"COMPRESSION\s+(.+)"#).unwrap().captures(attr_line) {
+                        compression = Some(caps[1].to_string());
+                    } else if let Some(caps) = Regex::new(r#"PALETTE\s+(.+)"#).unwrap().captures(attr_line) {
+                        palette = Some(caps[1].to_string());
+                    } else if let Some(caps) = Regex::new(r#"DPI\s+(\d+)"#).unwrap().captures(attr_line) {
+                        dpi = Some(caps[1].parse().unwrap());
+                    } else if let Some(caps) = Regex::new(r#"COLOR_MODE\s+(.+)"#).unwrap().captures(attr_line) {
+                        color_mode = Some(caps[1].to_string());
+                    } else if let Some(caps) = Regex::new(r#"COMPRESSION_LEVEL\s+(\d+)"#).unwrap().captures(attr_line) {
+                        compression_level = Some(caps[1].parse().unwrap());
+                    } else if let Some(caps) = Regex::new(r#"AUTHOR\s+(.+)"#).unwrap().captures(attr_line) {
+                        author = Some(caps[1].to_string());
+                    } else {
+                        warn!("Unknown attribute for bitmap '{}': {}", id, attr_line);
+                    }
+                }
+
+                // Add bitmap to the list
                 bitmap_list.add(RcBitmap {
-                    id: caps[1].to_string(),
-                    file: caps[2].to_string(),
+                    id,
+                    file: normalized_file,
+                    width,
+                    height,
+                    color_depth,
+                    compression,
+                    palette,
+                    dpi,
+                    color_mode,
+                    compression_level,
+                    author,
                 });
+
                 continue;
             }
 

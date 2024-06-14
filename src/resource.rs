@@ -2,6 +2,15 @@
 pub struct RcBitmap {
     pub id: String,
     pub file: String,
+    pub width: Option<u32>,
+    pub height: Option<u32>,
+    pub color_depth: Option<u32>,
+    pub compression: Option<String>,
+    pub palette: Option<String>,
+    pub dpi: Option<u32>,
+    pub color_mode: Option<String>,
+    pub compression_level: Option<u32>,
+    pub author: Option<String>,
 }
 
 pub struct RcBitmapList {
@@ -26,10 +35,39 @@ impl RcBitmapList {
                 "    qtMfcBitmapResources.insert({}, new CBitmap({}));",
                 bitmap.id, bitmap.file
             );
+            if let Some(width) = bitmap.width {
+                println!("    // Width: {}", width);
+            }
+            if let Some(height) = bitmap.height {
+                println!("    // Height: {}", height);
+            }
+            if let Some(color_depth) = bitmap.color_depth {
+                println!("    // Color Depth: {}", color_depth);
+            }
+            if let Some(compression) = &bitmap.compression {
+                println!("    // Compression: {}", compression);
+            }
+            if let Some(palette) = &bitmap.palette {
+                println!("    // Palette: {}", palette);
+            }
+            if let Some(dpi) = bitmap.dpi {
+                println!("    // DPI: {}", dpi);
+            }
+            if let Some(color_mode) = &bitmap.color_mode {
+                println!("    // Color Mode: {}", color_mode);
+            }
+            if let Some(compression_level) = bitmap.compression_level {
+                println!("    // Compression Level: {}", compression_level);
+            }
+            if let Some(author) = &bitmap.author {
+                println!("    // Author: {}", author);
+            }
         }
         println!("}}");
     }
 }
+
+
 
 #[derive(Debug)]
 pub struct RcIcon {
